@@ -32,15 +32,102 @@
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
+    <PropertyGroup>
+      <PostBuildEvent>xcopy /Y "E:\Projects\SCPSL\WebPlayer\WebPlayer.Server\bin\Debug\WebPlayer.Server.dll" "C:\Users\tayjm\AppData\Roaming\SCP Secret Laboratory\LabAPI\plugins\global"</PostBuildEvent>
+    </PropertyGroup>
     <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+        </Reference>
+        <Reference Include="BouncyCastle.Cryptography">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\BouncyCastle.Cryptography.dll</HintPath>
+        </Reference>
+        <Reference Include="CommandSystem.Core">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\CommandSystem.Core.dll</HintPath>
+        </Reference>
+        <Reference Include="DnsClient">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\DnsClient.dll</HintPath>
+        </Reference>
+        <Reference Include="LabApi">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\LabApi.dll</HintPath>
+        </Reference>
+        <Reference Include="Microsoft.CSharp" />
+        <Reference Include="Mirror">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\Mirror.dll</HintPath>
+        </Reference>
+        <Reference Include="mscorlib">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\mscorlib.dll</HintPath>
+        </Reference>
+        <Reference Include="netstandard">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\netstandard.dll</HintPath>
+        </Reference>
+        <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+          <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+          <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+        </Reference>
+        <Reference Include="Pooling">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\Pooling.dll</HintPath>
+        </Reference>
         <Reference Include="System"/>
         <Reference Include="System.Core"/>
         <Reference Include="System.Data"/>
+        <Reference Include="System.Security" />
         <Reference Include="System.Xml"/>
+        <Reference Include="UnityEngine">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+          <HintPath>C:\Users\tayjm\Desktop\scpsl\SCPSL_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Class1.cs"/>
+        <Compile Include="Config.cs" />
+        <Compile Include="Data\DoorData.cs" />
+        <Compile Include="Data\Events\EventData.cs" />
+        <Compile Include="Data\Events\PlayerChangedItemEventData.cs" />
+        <Compile Include="Data\Events\PlayerChangedRoleEventData.cs" />
+        <Compile Include="Data\Events\PlayerDeathEventData.cs" />
+        <Compile Include="Data\Events\PlayerJoinedEventData.cs" />
+        <Compile Include="Data\Events\PlayerLeftEventData.cs" />
+        <Compile Include="Data\Events\RoundStartedEventData.cs" />
+        <Compile Include="Data\FacilityData.cs" />
+        <Compile Include="Data\ItemData.cs" />
+        <Compile Include="Data\PickupData.cs" />
+        <Compile Include="Data\PlayerData.cs" />
+        <Compile Include="Data\RoomData.cs" />
+        <Compile Include="Handlers\FakePlayerHandler.cs" />
+        <Compile Include="Handlers\GameStateChangeTracker.cs" />
+        <Compile Include="Handlers\PlayerEventHandler.cs" />
+        <Compile Include="Handlers\ServerEventHandler.cs" />
+        <Compile Include="Handlers\WebPlayerNetworkConnection.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="WebPlayerPlugin.cs" />
+        <Compile Include="Web\Messages\Broadcaster.cs" />
+        <Compile Include="Web\Messages\ChangeHeldItemRequest.cs" />
+        <Compile Include="Web\Messages\MessageHandler.cs" />
+        <Compile Include="Web\Messages\MoveRotateRequest.cs" />
+        <Compile Include="Web\Messages\PartialStateUpdate.cs" />
+        <Compile Include="Web\Messages\WPMessage.cs" />
+        <Compile Include="Web\Messages\NewPlayerRequest.cs" />
+        <Compile Include="Web\Responses\ErrorResponse.cs" />
+        <Compile Include="Web\Responses\JsonResponse.cs" />
+        <Compile Include="Web\Responses\Response.cs" />
+        <Compile Include="Web\WebSocketServer\Client.cs" />
+        <Compile Include="Web\WebSocketServer\Helpers.cs" />
+        <Compile Include="Web\WebSocketServer\Server.cs" />
+        <Compile Include="Web\WsServer.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="App.config" />
+      <None Include="packages.config" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="index.html" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

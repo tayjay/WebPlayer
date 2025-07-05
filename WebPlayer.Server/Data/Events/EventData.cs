@@ -1,7 +1,11 @@
-﻿namespace WebPlayer.Server.Data.Events
+﻿using System;
+
+namespace WebPlayer.Server.Data.Events
 {
-    public class EventData
+    public abstract class EventData
     {
-        
+        public abstract string EventName { get; }
+        public DateTime TimeStamp => DateTime.Now;
+
     }
 }

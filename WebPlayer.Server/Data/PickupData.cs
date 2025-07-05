@@ -1,7 +1,7 @@
 ﻿using LabApi.Features.Wrappers;
 using UnityEngine;
 
-namespace WebPlayer.Server.Data.Events
+namespace WebPlayer.Server.Data
 {
     public class PickupData
     {
