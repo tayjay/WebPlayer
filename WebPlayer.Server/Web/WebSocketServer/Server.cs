@@ -263,11 +263,14 @@ namespace WebPlayer.Server.Web.WebSocketServer
                 int handshakeReceived = clientSocket.Receive(handshakeBuffer);
 
                 // Get the hanshake request key and get the hanshake response
-                string requestKey = Helpers.GetHandshakeRequestKey(Encoding.Default.GetString(handshakeBuffer));
-                string hanshakeResponse = Helpers.GetHandshakeResponse(Helpers.HashKey(requestKey));
+                string handshakeRequest = Encoding.Default.GetString(handshakeBuffer, 0, handshakeReceived);
+                Logger.Debug("Handshake request received: " + handshakeRequest.Replace("\r\n", "\\r\\n"));
                 
-                string handshakeRequest = Encoding.Default.GetString(handshakeBuffer);
-                //Logger.Debug("Handshake request: " + handshakeRequest);
+                string requestKey = Helpers.GetHandshakeRequestKey(handshakeRequest);
+                Logger.Debug("WebSocket key: " + requestKey);
+                
+                string hanshakeResponse = Helpers.GetHandshakeResponse(Helpers.HashKey(requestKey));
+                Logger.Debug("Handshake response: " + hanshakeResponse.Replace("\r\n", "\\r\\n"));
                 
                 // Extract the request path from the first line of the request
                 string requestLine = handshakeRequest.Split(new[] { "\r\n" }, StringSplitOptions.None)[0];
@@ -303,12 +306,23 @@ namespace WebPlayer.Server.Web.WebSocketServer
                         foreach (string queryPart in queryParts)
                         {
                             string[] queryPartParts = queryPart.Split('=');
-                            query[queryPartParts[0]] = queryPartParts[1];
+                            if (queryPartParts.Length >= 2)
+                            {
+                                string key = Uri.UnescapeDataString(queryPartParts[0]);
+                                string value = Uri.UnescapeDataString(queryPartParts[1]);
+                                query[key] = value;
+                            }
+                        }
+                        
+                        Logger.Debug($"Query parameters found: {query.Count}");
+                        foreach (var kvp in query)
+                        {
+                            Logger.Debug($"  {kvp.Key} = {kvp.Value}");
                         }
 
                         if (!query.ContainsKey("API-Key"))
                         {
-                            Logger.Error("No API key provided");
+                            Logger.Error("No API key provided in query parameters");
                             clientSocket.Send(Encoding.Default.GetBytes("HTTP/1.1 401 Unauthorized\r\n\r\n"));
                             clientSocket.Close();
                             GetSocket().BeginAccept(connectionCallback, null);
@@ -316,19 +330,21 @@ namespace WebPlayer.Server.Web.WebSocketServer
                         }
                         if (!ValidateApiKey(query["API-Key"]))
                         {
-                            Logger.Error("Invalid API key");
+                            Logger.Error("Invalid API key from query parameters");
                             clientSocket.Send(Encoding.Default.GetBytes("HTTP/1.1 401 Unauthorized\r\n\r\n"));
                             clientSocket.Close();
                             GetSocket().BeginAccept(connectionCallback, null);
                             return;
                         }
+                        Logger.Debug("API key validation successful from query parameters");
                     }
                     else
                     {
-                        Logger.Error("No API key provided");
+                        Logger.Error("No API key provided (no query string)");
                         clientSocket.Send(Encoding.Default.GetBytes("HTTP/1.1 401 Unauthorized\r\n\r\n"));
                         clientSocket.Close();
                         GetSocket().BeginAccept(connectionCallback, null);
+                        return;
                     }
                 }
                 

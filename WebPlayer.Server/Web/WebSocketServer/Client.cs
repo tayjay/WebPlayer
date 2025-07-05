@@ -115,10 +115,13 @@ namespace WebPlayer.Server.Web.WebSocketServer
                 
                 Logger.Debug(messageBuffer.Length);
 
+                // Log the first few bytes for debugging
+                string hexBytes = BitConverter.ToString(messageBuffer, 0, Math.Min(messageBuffer.Length, 10));
+                Logger.Debug($"First bytes: {hexBytes}");
                 
                 // Get the opcode of the frame
                 EOpcodeType opcode = Helpers.GetFrameOpcode(messageBuffer);
-                Logger.Debug("Opcode received!");
+                Logger.Debug($"Opcode received: {opcode}");
 
                 // If the connection was closed
                 if(opcode == EOpcodeType.ClosedConnection)

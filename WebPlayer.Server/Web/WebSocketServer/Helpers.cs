@@ -55,39 +55,53 @@ namespace WebPlayer.Server.Web.WebSocketServer
         /// <returns>The frame data</returns>
         public static SFrameMaskData GetFrameData(byte[] Data)
         {
-            // Get the opcode of the frame
-            int opcode = Data[0] - 128;
+            // Validate input
+            if (Data == null || Data.Length < 2)
+                return new SFrameMaskData(0, 0, 0, EOpcodeType.ClosedConnection);
+
+            // Get the opcode of the frame (lower 4 bits of first byte)
+            int opcode = Data[0] & 0x0F;
+
+            // Get the payload length (lower 7 bits of second byte)
+            int payloadLength = Data[1] & 0x7F;
 
             // If the length of the message is in the 2 first indexes
-            if (Data[1] - 128 <= 125)
+            if (payloadLength <= 125)
             {
-                int dataLength = (Data[1] - 128);
-                return new SFrameMaskData(dataLength, 2, dataLength + 6, (EOpcodeType)opcode);
+                if (Data.Length < 6) // Need at least 2 bytes header + 4 bytes mask
+                    return new SFrameMaskData(0, 0, 0, EOpcodeType.ClosedConnection);
+                    
+                return new SFrameMaskData(payloadLength, 2, payloadLength + 6, (EOpcodeType)opcode);
             }
 
             // If the length of the message is in the following two indexes
-            if (Data[1] - 128 == 126)
+            if (payloadLength == 126)
             {
+                if (Data.Length < 8) // Need at least 4 bytes header + 4 bytes mask
+                    return new SFrameMaskData(0, 0, 0, EOpcodeType.ClosedConnection);
+                    
                 // Combine the bytes to get the length
                 int dataLength = BitConverter.ToInt16(new byte[] { Data[3], Data[2] }, 0);
                 return new SFrameMaskData(dataLength, 4, dataLength + 8, (EOpcodeType)opcode);
             }
 
             // If the data length is in the following 8 indexes
-            if (Data[1] - 128 == 127)
+            if (payloadLength == 127)
             {
+                if (Data.Length < 14) // Need at least 10 bytes header + 4 bytes mask
+                    return new SFrameMaskData(0, 0, 0, EOpcodeType.ClosedConnection);
+                    
                 // Get the following 8 bytes to combine to get the data 
                 byte[] combine = new byte[8];
                 for (int i = 0; i < 8; i++) combine[i] = Data[i + 2];
 
                 // Combine the bytes to get the length
-                //int dataLength = (int)BitConverter.ToInt64(new byte[] { Data[9], Data[8], Data[7], Data[6], Data[5], Data[4], Data[3], Data[2] }, 0);
                 int dataLength = (int)BitConverter.ToInt64(combine, 0);
                 return new SFrameMaskData(dataLength, 10, dataLength + 14, (EOpcodeType)opcode);
             }
 
             // error
-            return new SFrameMaskData(0, 0, 0, 0);
+            return new SFrameMaskData(0, 0, 0, EOpcodeType.ClosedConnection);
         }
 
         /// <summary>Gets the opcode of a frame</summary>
@@ -95,7 +109,10 @@ namespace WebPlayer.Server.Web.WebSocketServer
         /// <returns>The opcode of the frame</returns>
         public static EOpcodeType GetFrameOpcode(byte[] Frame)
         {
-            return (EOpcodeType)Frame[0] - 128;
+            if (Frame == null || Frame.Length < 1)
+                return EOpcodeType.ClosedConnection;
+                
+            return (EOpcodeType)(Frame[0] & 0x0F); // Extract the opcode from the lower 4 bits
         }
 
         /// <summary>Gets the decoded frame data from the given byte array</summary>
@@ -105,6 +122,14 @@ namespace WebPlayer.Server.Web.WebSocketServer
         {
             // Get the frame data
             SFrameMaskData frameData = GetFrameData(Data);
+            
+            // Check if frame data is valid
+            if (frameData.DataLength == 0 || frameData.TotalLenght == 0 || frameData.Opcode == EOpcodeType.ClosedConnection)
+                return string.Empty;
+                
+            // Validate that we have enough data
+            if (Data.Length < frameData.TotalLenght)
+                return string.Empty;
 
             // Get the decode frame key from the frame data
             byte[] decodeKey = new byte[4];
@@ -216,7 +241,7 @@ namespace WebPlayer.Server.Web.WebSocketServer
         /// <returns></returns>
         public static string GetHandshakeResponse(string Key)
         {
-            return string.Format("HTTP/1.1 101 Switching Protocols\nUpgrade: WebSocket\nConnection: Upgrade\nSec-WebSocket-Accept: {0}\r\n\r\n", Key);
+            return string.Format("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: {0}\r\n\r\n", Key);
         }
 
         /// <summary>Gets the WebSocket handshake updgrade key from the http request</summary>
